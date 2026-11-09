@@ -5,6 +5,13 @@
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (e) => e.waitUntil(self.clients.claim()));
 
+// GitHub Pages lets a phone keep the page for ten minutes, and the page names the
+// release's files, so a release showed up to ten minutes late. Opening the app asks
+// the server whether the page changed (a cheap 304 when it did not).
+self.addEventListener("fetch", (e) => {
+  if (e.request.mode === "navigate") e.respondWith(fetch(e.request, { cache: "no-cache" }));
+});
+
 function record(sent) {
   return new Promise((resolve) => {
     const open = indexedDB.open("atl-push", 1);

@@ -395,4 +395,8 @@ button.menu-item.selected { color: var(--text); }
   .messages { padding-left: 12px; padding-right: 12px; }
   .card { margin: 0 16px; padding: 20px; }
   .composer-box textarea { font-size: 16px; } /* below 16px the phone zooms in on focus */
+  /* A menu never wider than the screen; the bell's list, opened from the drawer, takes the
+     screen's width below the bell instead of running off the right edge. */
+  .menu { max-width: calc(100vw - 16px); }
+  .menu.notify-menu { position: fixed; top: max(88px, calc(env(safe-area-inset-top) + 80px)); left: 8px; right: 8px; width: auto; max-width: none; max-height: 75vh; z-index: 40; }
 }

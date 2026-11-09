@@ -44,7 +44,7 @@ self.addEventListener("push", (e) => {
   }
   e.waitUntil(
     record(sent).then(() =>
-      self.registration.showNotification("ATL is waiting", { tag: "atl", renotify: true, icon: "/phone-icon-192.png", badge: "/phone-icon-192.png" }),
+      self.registration.showNotification("ATL is waiting", { tag: "atl", renotify: true, icon: "/phone-icon-192.png", badge: "/phone-badge-96.png" }),
     ),
   );
 });

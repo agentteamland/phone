@@ -1,6 +1,7 @@
-// The phone client's service worker (#2102). A push says only that ATL is waiting: its
-// text passes through the phone maker's push service. Each arrival is kept with the
-// time the server sent it, to measure how late pushes are (the last 500).
+// The phone client's service worker (#2102). A push says only that ATL is waiting,
+// in the interface language; its payload, which passes through the phone maker's push
+// service, carries only the time the server sent it. Each arrival is kept with that
+// time, to measure how late pushes are (the last 500).
 
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (e) => e.waitUntil(self.clients.claim()));
@@ -35,6 +36,25 @@ function record(sent) {
   });
 }
 
+// The text in the interface language the page left in Cache Storage (phone.ts
+// shareLanguage), else the phone's own languages, as lang.ts resolves "auto".
+const WAITING = { en: "ATL is waiting", tr: "ATL bekliyor" };
+
+async function language() {
+  try {
+    const r = await caches.match("/language", { cacheName: "atl-language" });
+    const l = r && (await r.text());
+    if (l === "en" || l === "tr") return l;
+  } catch {
+    /* no stored language: fall back to the phone's */
+  }
+  for (const p of self.navigator.languages || []) {
+    const base = p.toLowerCase().split(/[-_]/)[0];
+    if (base === "en" || base === "tr") return base;
+  }
+  return "en";
+}
+
 self.addEventListener("push", (e) => {
   let sent = 0;
   try {
@@ -43,8 +63,8 @@ self.addEventListener("push", (e) => {
     /* an unreadable payload still notifies */
   }
   e.waitUntil(
-    record(sent).then(() =>
-      self.registration.showNotification("ATL is waiting", { tag: "atl", renotify: true, icon: "/phone-icon-192.png", badge: "/phone-badge-96.png" }),
+    Promise.all([record(sent), language()]).then(([, l]) =>
+      self.registration.showNotification(WAITING[l], { tag: "atl", renotify: true, icon: "/phone-icon-192.png", badge: "/phone-badge-96.png" }),
     ),
   );
 });
